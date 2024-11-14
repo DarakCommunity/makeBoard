@@ -33,6 +33,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	// H2 Database
 	runtimeOnly 'com.h2database:h2'
+	implementation 'org.mindrot:jbcrypt:0.4'
 
 }
 
