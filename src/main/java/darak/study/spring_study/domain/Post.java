@@ -68,18 +68,6 @@ public class Post {
     @Enumerated(EnumType.STRING)
     private PostStatus status;                      // 게시글 상태
     
-    @PrePersist
-    protected void onCreate() {
-        this.createDate = LocalDateTime.now();      // 생성 시 현재 시간 저장
-    }
-    // @PrePersist: JPA가 엔티티를 저장하기 전에 자동으로 호출
-    // 생성 시간을 자동으로 설정하여 데이터 정합성 보장
-    
-    @PreUpdate
-    protected void onUpdate() {
-        this.updateDate = LocalDateTime.now();      // 수정 시 현재 시간 저장
-    }
-    
     // 게시글 수정
     public void update(String name, String content) {
         this.name = name;

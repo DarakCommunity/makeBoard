@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member {
+public class Member extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;                                 // 회원 고유 식별자
     
@@ -31,14 +31,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberStatus status;                    // 회원 상태
     
-    private LocalDateTime createDate;               // 생성일
-    private LocalDateTime updateDate;               // 수정일
-    
-    @PrePersist
-    protected void onCreate() {
-        // 회원 생성 시 비밀번호 암호화
-        this.password = BCrypt.hashpw(this.password, BCrypt.gensalt());
-    }
+
 }
 
 

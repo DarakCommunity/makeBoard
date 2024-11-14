@@ -1,7 +1,11 @@
 package darak.study.spring_study.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -10,8 +14,10 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
-public class Comment {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+public class Comment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,19 +41,17 @@ public class Comment {
 
     private String content;
 
-    private LocalDateTime createDate;
-    private LocalDateTime updateDate;
-
     @Enumerated(EnumType.STRING)
     private CommentStatus status;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createDate = LocalDateTime.now();
+    // 비즈니스 메서드
+    public void updateContent(String content) {
+        this.content = content;
     }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updateDate = LocalDateTime.now();
+    
+    // 연관관계 편의 메서드
+    public void setPost(Post post) {
+        this.post = post;
     }
+    
 }

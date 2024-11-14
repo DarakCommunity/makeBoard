@@ -1,15 +1,21 @@
 package darak.study.spring_study.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
-public class Attachment {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+public class Attachment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,13 +34,11 @@ public class Attachment {
     @JoinColumn(name = "postId", nullable = false) // 외래 키 설정
     private Post post;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createDate = LocalDateTime.now();
+    // 비즈니스 메서드
+    public void updateFileInfo(String fileName, String contentType, long fileSize) {
+        this.fileName = fileName;
+        this.contentType = contentType;
+        this.fileSize = fileSize;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updateDate = LocalDateTime.now();
-    }
 }
