@@ -1,2 +1,3 @@
-# study1
-spring study
+# make board
+
+using spring, make a simple board
