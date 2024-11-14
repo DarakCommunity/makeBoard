@@ -4,12 +4,14 @@ import darak.study.spring_study.domain.Post;
 import darak.study.spring_study.dto.PostUpdateRequest;
 import darak.study.spring_study.dto.PostPageResponse;
 import darak.study.spring_study.repository.PostRepository;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,7 +95,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Optional<Post> findPostWithComments(Long postId) {
-        return postRepository.findByIdWithComments(postId);
+        return postRepository.findByIdWithMemberAndComments(postId);
     }
 
     @Transactional(readOnly = true)
@@ -114,7 +116,11 @@ public class PostService {
     @Modifying
     @Query("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :id")
     public void incrementLikeCount(Long postId) {
+        try {
         postRepository.incrementLikeCount(postId);
+    } catch (OptimisticLockException e) {
+        throw new ConcurrentModificationException("다시 시도해주세요.");
+    }
     }
 
     // 게시글 수정 (단일 메서드로 통합)

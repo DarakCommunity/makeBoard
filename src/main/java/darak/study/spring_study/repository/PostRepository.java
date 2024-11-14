@@ -72,7 +72,7 @@ public interface PostRepository {
 
     // N+1 문제 해결을 위한 메서드 추가
 
-    Optional<Post> findByIdWithComments(Long id);
+    Optional<Post> findByIdWithMemberAndComments(Long id);
 
     
 

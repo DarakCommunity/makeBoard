@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class PostPageResponse {
-    private List<Post> posts;
+    private List<PostDto> posts;
     private int currentPage;
     private int pageSize;
     private long totalElements;

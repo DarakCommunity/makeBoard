@@ -1,8 +1,8 @@
 package darak.study.spring_study.dto;
 
-import darak.study.spring_study.domain.Post;
 import lombok.Builder;
 import lombok.Getter;
+import darak.study.spring_study.domain.Post;
 
 @Getter
 @Builder

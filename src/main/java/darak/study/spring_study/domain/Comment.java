@@ -38,6 +38,9 @@ public class Comment {
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
 
+    @Enumerated(EnumType.STRING)
+    private CommentStatus status;
+
     @PrePersist
     protected void onCreate() {
         this.createDate = LocalDateTime.now();

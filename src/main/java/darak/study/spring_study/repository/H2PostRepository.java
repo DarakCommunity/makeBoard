@@ -81,15 +81,15 @@ public class H2PostRepository implements PostRepository{
 
     // N+1 문제 해결을 위한 메서드
     @Override
-    public Optional<Post> findByIdWithComments(Long id) {
-        List<Post> result = em.createQuery(
+    public Optional<Post> findByIdWithMemberAndComments(Long id) {
+       return em.createQuery(
             "SELECT DISTINCT p FROM Post p " +
+            "LEFT JOIN FETCH p.member " +
             "LEFT JOIN FETCH p.comments " +
             "WHERE p.id = :id", Post.class)
             .setParameter("id", id)
-            .getResultList();
-        
-        return result.stream().findFirst();
+            .getResultStream()
+            .findFirst();
     }
     
     // 페이징을 위한 메서드
@@ -108,10 +108,22 @@ public class H2PostRepository implements PostRepository{
             .getSingleResult();
     }
 
+    // 동시성 처리 개선
     @Override
     public void incrementLikeCount(Long id) {
-        em.createQuery("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :id")
+        em.createQuery(
+            "UPDATE Post p SET p.likeCount = p.likeCount + 1, " +
+            "p.version = p.version + 1 " +
+            "WHERE p.id = :id AND p.version = :version")
             .setParameter("id", id)
+            .setParameter("version", getVersion(id))
             .executeUpdate();
+    }
+
+    private Long getVersion(Long id) {
+        Long version = em.createQuery("SELECT p.version FROM Post p WHERE p.id = :id", Long.class)
+                .setParameter("id", id)
+                .getSingleResult();
+        return version != null ? version : 0L;
     }
 }
