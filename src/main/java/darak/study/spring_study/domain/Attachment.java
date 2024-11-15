@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
+@Builder(toBuilder = true)
 public class Attachment extends BaseTimeEntity {
 
     @Id
@@ -27,18 +27,17 @@ public class Attachment extends BaseTimeEntity {
     private String fileType;
     private String fileName;
 
-    private LocalDateTime createDate; // LocalDateTime 타입으로 변경
-    private LocalDateTime updateDate; // LocalDateTime 타입으로 변경
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "postId", nullable = false) // 외래 키 설정
     private Post post;
 
     // 비즈니스 메서드
-    public void updateFileInfo(String fileName, String contentType, long fileSize) {
-        this.fileName = fileName;
-        this.contentType = contentType;
-        this.fileSize = fileSize;
+    public Attachment updateFileInfo(String fileName, String contentType, long fileSize) {
+        return this.toBuilder()
+                .fileName(fileName)
+                .contentType(contentType)
+                .fileSize(fileSize)
+                .build();
     }
 
 }

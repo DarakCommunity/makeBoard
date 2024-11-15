@@ -31,7 +31,12 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private MemberStatus status;                    // 회원 상태
     
-
+    public void update(String username, String phoneNum, int age, Grade grade) {
+        if (username != null) this.username = username;
+        if (phoneNum != null) this.phoneNum = phoneNum;
+        if (age > 0) this.age = age;
+        if (grade != null) this.grade = grade;
+    }
 }
 
 

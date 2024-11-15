@@ -5,7 +5,9 @@ import darak.study.spring_study.repository.AttachmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,12 +45,11 @@ public class AttachmentService {
         Attachment existingAttachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 첨부파일이 존재하지 않습니다."));
 
-        existingAttachment.setFileName(updatedAttachment.getFileName());
-        existingAttachment.setFileUrl(updatedAttachment.getFileUrl());
-        existingAttachment.setContentType(updatedAttachment.getContentType());
-        existingAttachment.setFileSize(updatedAttachment.getFileSize());
-        existingAttachment.setFileType(updatedAttachment.getFileType());
-
+        existingAttachment.updateFileInfo(
+            updatedAttachment.getFileName(),
+            updatedAttachment.getContentType(),
+            updatedAttachment.getFileSize()
+        );
         return attachmentRepository.save(existingAttachment);
     }
 

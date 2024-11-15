@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import darak.study.spring_study.exception.UnauthorizedException;
+
 @Entity  
 // JPA가 이 클래스를 데이터베이스 테이블과 매핑하도록 지정
 // 이 어노테이션이 있으면 JPA가 이 클래스의 인스턴스를 데이터베이스에 자동으로 저장/조회 가능
@@ -23,10 +25,10 @@ import java.util.List;
 // Builder 패턴 구현을 위해 필요
 // private으로 설정하여 외부에서 직접 호출 불가능
 
-@Builder
+@Builder(toBuilder = true)
 // 객체 생성을 위한 빌더 패턴 구현
 // 많은 필드가 있을 때 가독성 있고 안전한 객체 생성 가능
-public class Post {
+public class Post extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;                                // 게시글 고유 식별자
     // @Id: 기본 키 지정
@@ -53,26 +55,36 @@ public class Post {
     // cascade = CascadeType.ALL: 게시글에 대한 모든 작업이 댓글에도 전파
     // orphanRemoval = true: 게시글에서 제거된 댓글은 자동 삭제
 
+    @Column(nullable = false)
     private String name;                            // 게시글 제목
-    private LocalDateTime createDate;               // 생성일
-    private LocalDateTime updateDate;               // 수정일
-    private int likeCount;                          // 좋아요 수
+    
+    @Builder.Default
+    @Column(columnDefinition = "integer default 0")
+    private int likeCount=0;                          // 좋아요 수
+    
+    
+    @Column(nullable = false, length = 5000)
     private String content;                         // 게시글 내용
-    private int viewCount;                          // 조회수
+    
+    
+    @Builder.Default
+    @Column(columnDefinition = "integer default 0")
+    private int viewCount=0;                          // 조회수
     
     @Version
+    @Builder.Default
     private Long version = 0L;                      // 동시성 제어를 위한 버전
     // 낙관적 락(Optimistic Lock)을 위한 버전 관리
     // 동시성 제어: 여러 사용자가 동시에 같은 게시글을 수정할 때 발생할 수 있는 문제 방지
 
     @Enumerated(EnumType.STRING)
-    private PostStatus status;                      // 게시글 상태
+    @Builder.Default
+    private PostStatus status = PostStatus.DRAFT;                      // 게시글 상태
     
     // 게시글 수정
     public void update(String name, String content) {
         this.name = name;
         this.content = content;
-        this.updateDate = LocalDateTime.now();
     }
     
     // 댓글 추가
@@ -83,9 +95,27 @@ public class Post {
     // 양방향 관계 설정을 위한 편의 메서드
     // 댓글 추가 시 양쪽 모두 관계를 설정하여 일관성 유지
     
-    // 좋아요 증가
-    public void incrementLikeCount() {
-        this.likeCount++;
+   
+    // 게시글 삭제
+     public void softDelete() {
+        this.status = PostStatus.DELETED;
+    }
+    
+    // 게시글 삭제 여부 확인
+    public boolean isDeleted() {
+        return PostStatus.DELETED.equals(this.status);
+    }
+
+    // 게시글이 공개 상태인지 확인
+    public boolean isPublic() {
+        return PostStatus.PUBLIC.equals(this.status);
+    }
+    
+    // 게시글 작성자 검증
+    public void validateWriter(Member member) {
+        if (!this.member.equals(member)) {
+            throw new UnauthorizedException("게시글의 작성자가 아닙니다.");
+        }
     }
 }
 

@@ -87,20 +87,18 @@ public class MemberService {
     }
 
     //    회원 업데이트
-    public Member update(Member updatingMember){
+    public Member update(Member updatingMember) {
         Member existingMember = memberRepository.findById(updatingMember.getId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 회원이 존재 하지 않습니다"));
 
-        Member updatedMember = Member.builder()
-                .id(existingMember.getId())
-                .grade(updatingMember.getGrade() != null ? updatingMember.getGrade() : existingMember.getGrade() )
-                .phoneNum(updatingMember.getPhoneNum() != null ? updatingMember.getPhoneNum() : existingMember.getPhoneNum() )
-                .age(updatingMember.getAge() <=0 ? existingMember.getAge() : updatingMember.getAge() )
-                .email(existingMember.getEmail() != null ? existingMember.getEmail() : updatingMember.getEmail() )
-                .build();
+        existingMember.update(
+            updatingMember.getUsername(),
+            updatingMember.getPhoneNum(),
+            updatingMember.getAge(),
+            updatingMember.getGrade()
+        );
 
-        //        내부적으로 동일 맴버이면 덮어씌우기
-        return memberRepository.save(updatedMember);
+        return memberRepository.save(existingMember);
     }
 }
 

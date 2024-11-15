@@ -2,6 +2,8 @@ package darak.study.spring_study.domain;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -11,12 +13,19 @@ import java.time.LocalDateTime;
 
 @Getter
 @MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
 public abstract class BaseTimeEntity {
     
-    @CreatedDate
     private LocalDateTime createDate;
-    
-    @LastModifiedDate
     private LocalDateTime updateDate;
+    
+    @PrePersist
+    public void prePersist() {
+        this.createDate = LocalDateTime.now();
+        this.updateDate = this.createDate;
+    }
+    
+    @PreUpdate
+    public void preUpdate() {
+        this.updateDate = LocalDateTime.now();
+    }
 } 

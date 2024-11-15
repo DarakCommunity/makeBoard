@@ -1,7 +1,9 @@
 package darak.study.spring_study.repository;
 
 import darak.study.spring_study.domain.Post;
+import darak.study.spring_study.domain.PostStatus;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
@@ -82,12 +84,14 @@ public class H2PostRepository implements PostRepository{
     // N+1 문제 해결을 위한 메서드
     @Override
     public Optional<Post> findByIdWithMemberAndComments(Long id) {
-       return em.createQuery(
+        return em.createQuery(
             "SELECT DISTINCT p FROM Post p " +
-            "LEFT JOIN FETCH p.member " +
-            "LEFT JOIN FETCH p.comments " +
-            "WHERE p.id = :id", Post.class)
+            "LEFT JOIN FETCH p.member " +  // 작성자 정보
+            "LEFT JOIN FETCH p.comments c " +  // 댓글
+            "LEFT JOIN FETCH c.member " +  // 댓글 작성자
+            "WHERE p.id = :id AND p.status <> :status", Post.class)
             .setParameter("id", id)
+            .setParameter("status", PostStatus.DELETED)
             .getResultStream()
             .findFirst();
     }
@@ -95,7 +99,11 @@ public class H2PostRepository implements PostRepository{
     // 페이징을 위한 메서드
     @Override
     public List<Post> findAllWithPaging(int offset, int limit) {
-        return em.createQuery("SELECT p FROM Post p ORDER BY p.createDate DESC", Post.class)
+        return em.createQuery(
+            "SELECT p FROM Post p " +
+            "WHERE p.status <> :status " +
+            "ORDER BY p.createDate DESC", Post.class)
+            .setParameter("status", PostStatus.DELETED)
             .setFirstResult(offset)
             .setMaxResults(limit)
             .getResultList();
@@ -108,16 +116,51 @@ public class H2PostRepository implements PostRepository{
             .getSingleResult();
     }
 
+    @Override
+    public void incrementViewCount(Long postId) {
+        try {
+            int updatedCount = em.createQuery(
+                "UPDATE Post p " +
+                "SET p.viewCount = p.viewCount + 1, " +
+                "p.version = p.version + 1 " +
+                "WHERE p.id = :id " +
+                "AND p.version = :version " +
+                "AND p.status <> :status")
+                .setParameter("id", postId)
+                .setParameter("version", getVersion(postId))
+                .setParameter("status", PostStatus.DELETED)
+                .executeUpdate();
+                
+            if (updatedCount == 0) {
+                throw new OptimisticLockException("동시성 문제가 발생했습니다");
+            }
+        } catch (Exception e) {
+            throw new OptimisticLockException("조회수 증가 중 오류가 발생했습니다", e);
+        }
+    }
+
     // 동시성 처리 개선
     @Override
     public void incrementLikeCount(Long id) {
-        em.createQuery(
-            "UPDATE Post p SET p.likeCount = p.likeCount + 1, " +
-            "p.version = p.version + 1 " +
-            "WHERE p.id = :id AND p.version = :version")
-            .setParameter("id", id)
-            .setParameter("version", getVersion(id))
-            .executeUpdate();
+        try {
+            int updatedCount = em.createQuery(
+                "UPDATE Post p " +
+                "SET p.likeCount = p.likeCount + 1, " +
+                "p.version = p.version + 1 " +
+                "WHERE p.id = :id " +
+                "AND p.version = :version " +
+                "AND p.status <> :status")
+                .setParameter("id", id)
+                .setParameter("version", getVersion(id))
+                .setParameter("status", PostStatus.DELETED)
+                .executeUpdate();
+                
+            if (updatedCount == 0) {
+                throw new OptimisticLockException("동시성 문제가 발생했습니다");
+            }
+        } catch (Exception e) {
+            throw new OptimisticLockException("좋아요 증가 중 오류가 발생했습니다", e);
+        }
     }
 
     private Long getVersion(Long id) {

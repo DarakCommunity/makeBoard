@@ -37,9 +37,8 @@ public class CommentService {
     public Comment updateComment(Long commentId, Comment updatedComment) {
         Comment existingComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 댓글이 존재하지 않습니다."));
-
-        existingComment.setContent(updatedComment.getContent());
-        existingComment.setUpdateDate(updatedComment.getUpdateDate());
+        
+        existingComment.updateContent(updatedComment.getContent());
 
         return commentRepository.save(existingComment);
     }

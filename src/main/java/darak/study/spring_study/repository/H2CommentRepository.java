@@ -1,6 +1,7 @@
 package darak.study.spring_study.repository;
 
 import darak.study.spring_study.domain.Comment;
+import darak.study.spring_study.domain.CommentStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
@@ -56,9 +57,17 @@ public class H2CommentRepository implements CommentRepository{
 //    특정 게시글에 속한 댓글 조회
     @Override
     public List<Comment> findByPostId(Long postId) {
-        return em.createQuery("select c from Comment c where c.post.id = :postId", Comment.class)
-                .setParameter("postId", postId)
-                .getResultList();
+        return em.createQuery(
+            "SELECT DISTINCT c FROM Comment c " +
+            "LEFT JOIN FETCH c.member " +  // 작성자 정보
+            "LEFT JOIN FETCH c.childComments cc " +  // 대댓글
+            "LEFT JOIN FETCH cc.member " +  // 대댓글 작성자
+            "WHERE c.post.id = :postId " +
+            "AND c.parentComment IS NULL " +  // 루트 댓글만
+            "AND c.status <> :status", Comment.class)
+            .setParameter("postId", postId)
+            .setParameter("status", CommentStatus.DELETED)
+            .getResultList();
     }
 
 //    특정 문자열을 포함한 댓글 조회

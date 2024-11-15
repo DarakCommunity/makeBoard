@@ -64,11 +64,6 @@ public interface PostRepository {
 
 
 
-    // 동시성 문제가 발생할 수 있는 코드
-
-    public void incrementLikeCount(Long postId);
-
-
 
     // N+1 문제 해결을 위한 메서드 추가
 
@@ -86,8 +81,11 @@ public interface PostRepository {
 
     long count();
 
+    // 조회수 증가
+    void incrementViewCount(Long postId);
 
-
+    // 좋아요 증가
+    void incrementLikeCount(Long postId);
 
 
 }
