@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,24 +41,26 @@ public class Comment extends BaseTimeEntity {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private CommentStatus status;
+    @Column(nullable = false)
+    private CommentStatus status = CommentStatus.ACTIVE;
 
     
     // 연관관계 편의 메서드
     public void setPost(Post post) {
-        // 기존 관계 제거
-        if (this.post != null) {
-            this.post.getComments().remove(this);
+        if (post == null) {
+            throw new IllegalArgumentException("게시글은 필수입니다.");
         }
         this.post = post;
-        // 새로운 관계 설정
-        if (post != null) {
-            post.getComments().add(this);
-        }
     }
 
     // 부모-자식 댓글 관계 설정
     public void addChildComment(Comment child) {
+        if (child == null) {
+            throw new IllegalArgumentException("자식 댓글은 null일 수 없습니다.");
+        }
+        if (this.isDeleted()) {
+            throw new IllegalStateException("삭제된 댓글에는 답글을 달 수 없습니다.");
+        }
         this.childComments.add(child);
         child.setParentComment(this);
     }
@@ -81,6 +82,9 @@ public class Comment extends BaseTimeEntity {
 
     // 댓글 상태 변경
     public void changeStatus(CommentStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("상태값은 필수입니다.");
+        }
         this.status = status;
     }
 
@@ -89,4 +93,13 @@ public class Comment extends BaseTimeEntity {
         return CommentStatus.DELETED.equals(this.status);
     }
     
+    // 댓글 수정 가능 여부 확인
+    public boolean isEditable() {
+        return !isDeleted() && status == CommentStatus.ACTIVE;
+    }
+
+    // 계층 구조 확인
+    public boolean isReply() {
+        return parentComment != null;
+}
 }

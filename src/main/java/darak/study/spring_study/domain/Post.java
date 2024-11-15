@@ -2,7 +2,6 @@ package darak.study.spring_study.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,12 +54,13 @@ public class Post extends BaseTimeEntity {
     // cascade = CascadeType.ALL: 게시글에 대한 모든 작업이 댓글에도 전파
     // orphanRemoval = true: 게시글에서 제거된 댓글은 자동 삭제
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String name;                            // 게시글 제목
     
+    // 기본값 설정 방식 개선
     @Builder.Default
-    @Column(columnDefinition = "integer default 0")
-    private int likeCount=0;                          // 좋아요 수
+    @Column(nullable = false)
+    private int likeCount = 0;                         // 좋아요 수
     
     
     @Column(nullable = false, length = 5000)
@@ -68,8 +68,8 @@ public class Post extends BaseTimeEntity {
     
     
     @Builder.Default
-    @Column(columnDefinition = "integer default 0")
-    private int viewCount=0;                          // 조회수
+    @Column(nullable = false)
+    private int viewCount = 0;
     
     @Version
     @Builder.Default
@@ -83,8 +83,25 @@ public class Post extends BaseTimeEntity {
     
     // 게시글 수정
     public void update(String name, String content) {
+        validateUpdate(name, content);
         this.name = name;
         this.content = content;
+    }
+
+    // 게시글 수정 유효성 검증
+    private void validateUpdate(String name, String content) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("제목은 필수입니다.");
+        }
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("내용은 필수입니다.");
+        }
+        if (name.length() > 200) {
+            throw new IllegalArgumentException("제목은 200자를 초과할 수 없습니다.");
+        }
+        if (content.length() > 5000) {
+            throw new IllegalArgumentException("내용은 5000자를 초과할 수 없습니다.");
+        }
     }
     
     // 댓글 추가

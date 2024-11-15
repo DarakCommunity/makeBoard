@@ -47,7 +47,7 @@ public class AttachmentService {
 
         existingAttachment.updateFileInfo(
             updatedAttachment.getFileName(),
-            updatedAttachment.getContentType(),
+            updatedAttachment.getFileType(),
             updatedAttachment.getFileSize()
         );
         return attachmentRepository.save(existingAttachment);
