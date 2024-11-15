@@ -6,7 +6,7 @@ import lombok.*;
 
 @Getter
 @Entity
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseTimeEntity {
@@ -15,6 +15,7 @@ public class Member extends BaseTimeEntity {
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private Grade grade = Grade.MEMBER;                            // 회원 등급 (ADMIN, MEMBER)
     
     @Column(length = 20)
@@ -34,6 +35,7 @@ public class Member extends BaseTimeEntity {
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private MemberStatus status = MemberStatus.ACTIVE;                    // 회원 상태
     
     // 회원 정보 업데이트 메서드 개선

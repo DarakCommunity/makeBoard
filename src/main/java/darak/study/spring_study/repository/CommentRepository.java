@@ -22,10 +22,9 @@ public interface CommentRepository {
     // 특정 게시글 ID에 속한 모든 댓글 조회
     List<Comment> findByPostId(Long postId);
 
-//    특정 문자열을 포함한 댓글 조회
+    // 특정 문자열을 포함한 댓글 조회
     List<Comment> findContentContaining(String keyword);
 
-
-//    특정 부모 댓글에 속한 모든 대댓글 조회
+    // 특정 부모 댓글에 속한 모든 대댓글 조회
     List<Comment> findByParentCommentId(Long parentId);
 }

@@ -45,6 +45,7 @@ public class PostService {
         }
     }
 
+    // 페이징 유효성 검사
     private void validatePagingParameters(int page, int size) {
         if (page < 1) {
             throw new IllegalArgumentException("페이지 번호는 1 이상이어야 합니다.");

@@ -19,11 +19,11 @@ public class H2AttachmentRepository implements AttachmentRepository{
     @Override
     public Attachment save(Attachment attachment) {
         if(attachment.getId() == null){
-            em.persist(attachment);
+            em.persist(attachment); // 신규 엔티티면 영속화
             return attachment;
         }
         else{
-            return em.merge(attachment);
+            return em.merge(attachment); // 기존 엔티티면 병합
         }
 
 
@@ -47,10 +47,10 @@ public class H2AttachmentRepository implements AttachmentRepository{
     public void deleteById(Long id) {
         Attachment attachment = em.find(Attachment.class, id);
         if(attachment != null){
-            em.remove(attachment);
+            em.remove(attachment); // 존재하는 엔티티면 삭제
         }
         else {
-            throw new IllegalArgumentException("해당 id를 가진 첨부파일은 존재하지 않습니다");
+            throw new IllegalArgumentException("해당 id를 가진 첨부파일은 존재하지 않습니다"); // 존재하지 않는 엔티티면 예외 발생
         }
 
     }

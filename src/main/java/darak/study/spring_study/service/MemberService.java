@@ -2,7 +2,6 @@ package darak.study.spring_study.service;
 
 import darak.study.spring_study.domain.Member;
 import darak.study.spring_study.domain.MemberStatus;
-import darak.study.spring_study.repository.H2MemberRepository;
 import darak.study.spring_study.repository.MemberRepository;
 import darak.study.spring_study.exception.InvalidInputException;
 import darak.study.spring_study.exception.DuplicateEmailException;
@@ -13,7 +12,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +27,7 @@ public class MemberService {
          // 비밀번호 암호화는 서비스 계층에서 처리
         String encodedPassword = BCrypt.hashpw(member.getPassword(), BCrypt.gensalt());
         Member newMember = Member.builder()
+                .id(member.getId())
                 .email(member.getEmail())
                 .password(encodedPassword)
                 .username(member.getUsername())

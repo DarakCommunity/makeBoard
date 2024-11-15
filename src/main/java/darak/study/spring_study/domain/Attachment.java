@@ -17,20 +17,27 @@ public class Attachment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 필드명 일관성 유지
-
-    private String fileUrl;
-    private long fileSize; // int 대신 long 타입으로 변경
-    private String fileType;
-    private String fileName;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "postId", nullable = false) // 외래 키 설정
+    @JoinColumn(name = "postId", nullable = false)
     private Post post;
 
-    // 비즈니스 메서드
-    // updateFileInfo 메서드에서 불필요한 builder 패턴 사용을 간소화
-    public void updateFileInfo(String fileName, String fileType, long fileSize) {
+    @Column(nullable = false)
+    private String fileName;
+
+    @Column(nullable = false)
+    private String fileType;
+
+    @Column(nullable = false)
+    private Long fileSize;
+
+    // Post 설정 메서드
+    public void setPost(Post post) {
+        this.post = post;
+    }
+
+    public void updateFileInfo(String fileName, String fileType, Long fileSize) {
         this.fileName = fileName;
         this.fileType = fileType;
         this.fileSize = fileSize;

@@ -81,6 +81,9 @@ public class Post extends BaseTimeEntity {
     @Builder.Default
     private PostStatus status = PostStatus.DRAFT;                      // 게시글 상태
     
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attachment> attachments = new ArrayList<>();
+    
     // 게시글 수정
     public void update(String name, String content) {
         validateUpdate(name, content);
@@ -133,6 +136,18 @@ public class Post extends BaseTimeEntity {
         if (!this.member.equals(member)) {
             throw new UnauthorizedException("게시글의 작성자가 아닙니다.");
         }
+    }
+
+    // 첨부파일 추가 메서드
+    public void addAttachment(Attachment attachment) {
+        this.attachments.add(attachment);
+        attachment.setPost(this);
+    }
+
+    // 첨부파일 제거 메서드
+    public void removeAttachment(Attachment attachment) {
+        this.attachments.remove(attachment);
+        attachment.setPost(null);
     }
 }
 
